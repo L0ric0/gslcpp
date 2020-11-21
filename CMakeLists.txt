@@ -10,14 +10,7 @@ enable_testing()
 
 project(gslcpp VERSION 0.0.1)
 
-file(GLOB_RECURSE SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "gslcpp/src/*.cpp")
-
-add_library(gslcpp ${SOURCES})
-
-target_include_directories(gslcpp PUBLIC "gslcpp/include")
-
-find_package(GSL REQUIRED)
-target_link_libraries(gslcpp PRIVATE GSL::gsl GSL::gslcblas)
+add_subdirectory(gslcpp)
 
 ### TESTS ###
 add_subdirectory(tests)
