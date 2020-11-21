@@ -53,6 +53,11 @@ namespace gslcpp
             return gsl_asinh(x);
         }
 
+        double atanh(const double x)
+        {
+            return gsl_atanh(x);
+        }
+
         double ldexp(double x, int e)
         {
             return gsl_ldexp(x, e);

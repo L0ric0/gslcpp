@@ -96,6 +96,11 @@ namespace gslcpp
          */
         double asinh(const double x);
 
+        /*! This function computes the value of $arctanh(x)$. It provides an alternative to the
+         * stdlib function `std::atanh(x)`.
+         */
+        double atanh(const double x);
+
         /*! This function computes the value of $x*2^e$. It provides an alternative to the stdlib
          * function `std::ldexp(x)`.
          */
