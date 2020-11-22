@@ -104,13 +104,45 @@ namespace gslcpp
         /*! This function computes the value of $x*2^e$. It provides an alternative to the stdlib
          * function `std::ldexp(x)`.
          */
-        double ldexp(double x, int e);
+        double ldexp(const double x, const int e);
 
         /*! This function splits the number $x$ into its normalized fraction $f$ and exponent $e$,
          * such that $x=f*2^e$ and $0.5 \leq f < 1$. The function returns $f$ and stores the
          * exponent in $e$. If $x$ is zero, both $f$ and $e$ are set to zero. This function provides
          * an alternative to the stdlib function `std::frexp(x, e)`.
          */
-        double frexp(double x, int* e);
+        double frexp(const double x, int* e);
+
+        /*! This routine computes the power $x^n$ for integer $n$. The power is computed efficiently
+         * - for example, $x^8$ is computed as $((x^2)^2)^2$, requiring only 3 multiplications. A
+         * version of this function also computes the numerical error in the result is available as
+         * `\todo`.
+         */
+        double pow(const double x, const int n);
+
+        /*! This routine computes the power $x^n$ for integer $n$. The power is computed efficiently
+         * - for example, $x^8$ is computed as $((x^2)^2)^2$, requiring only 3 multiplications. A
+         * version of this function also computes the numerical error in the result is available as
+         * `\todo`.
+         */
+        double pow(const double x, const unsigned int n);
+
+        /*!This function determines whether x and y are approximately equal to a relative accuracy
+         * epsilon.
+         *
+         * The relative accuracy is measured using an interval of size $2 \delta$, where $\delta =
+         * 2^k \epsilon$ and $k$ is the maximum $base-2$ exponent of $x$ and $y$ as computed by the
+         * function `frexp()`.
+         *
+         * If $x$ and $y$ lie within this interval, they are considered approximately equal and the
+         * function returns `std::strong_ordering::equal`. Otherwise if $x < y$, the function
+         * returns `std::strong_ordering::less`, or if $x > y$, the function returns
+         * `std::strong_ordering::greater`.
+         *
+         * Note that $x$ and $y$ are compared to relative accuracy, so this function is not suitable
+         * for testing whether a value is approximately zero.
+         */
+        std::strong_ordering fcmp(const double x, const double y, const double epsilon);
+
     } // namespace math
 } // namespace gslcpp
