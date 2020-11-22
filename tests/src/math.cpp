@@ -311,3 +311,17 @@ TEST(Numbers, finite)
     ASSERT_FALSE(gslcpp::math::finite(-inf));
     ASSERT_FALSE(gslcpp::math::finite(nan));
 }
+
+TEST(ElementaryFunctions, pow_int)
+{
+    for (int n = -9; n < 10; n++) {
+        ASSERT_DOUBLE_EQ(std::pow(-3.14, n), gslcpp::math::pow(-3.14, n));
+    }
+}
+
+TEST(ElementaryFunctions, pow_uint)
+{
+    for (unsigned int n = 0; n < 10; n++) {
+        ASSERT_DOUBLE_EQ(std::pow(-3.14, n), gslcpp::math::pow(-3.14, n));
+    }
+}
