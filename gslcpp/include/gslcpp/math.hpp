@@ -4,7 +4,7 @@
 #include <gsl/gsl_math.h>
 
 // global
-#import <compare>
+#include <compare>
 #include <type_traits>
 
 namespace gslcpp
