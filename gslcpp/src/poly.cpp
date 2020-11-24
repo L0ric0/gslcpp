@@ -38,4 +38,49 @@ namespace gslcpp::polynomial
         return res;
     }
 
+    std::vector<double> solve_quadratic(const double a, const double b, const double c) {
+        double x0, x1;
+        int num_roots = gsl_poly_solve_quadratic(a, b, c, &x0, &x1);
+        if (num_roots == 0) {
+            return std::vector<double> {};
+        }
+        if (num_roots == 1) {
+            return std::vector<double> { x0 };
+        }
+        return std::vector<double> { x0, x1 };
+    }
+
+    std::vector<std::complex<double>> solve_quadratic(const std::complex<double> a, const std::complex<double> b, const std::complex<double> c) {
+        std::complex<double> x0, x1;
+        int num_roots = gsl_poly_complex_solve_quadratic(a.real(), b.real(), c.real(), reinterpret_cast<gsl_complex*>(&x0), reinterpret_cast<gsl_complex*>(&x1));
+        if (num_roots == 0) {
+            return std::vector<std::complex<double>> {};
+        }
+        if (num_roots == 1) {
+            return std::vector<std::complex<double>> { x0 };
+        }
+        return std::vector<std::complex<double>> { x0, x1 };
+    }
+
+    std::vector<double> solve_cubic(const double a, const double b, const double c) {
+        double x0, x1, x2;
+        int num_roots = gsl_poly_solve_cubic(a, b, c, &x0, &x1, &x2);
+        if (num_roots == 1) {
+            return std::vector<double> { x0 };
+        }
+        return std::vector<double> { x0, x1, x2 };
+    }
+
+    std::vector<double> solve_cubic(
+        const std::complex<double> a,
+        const std::complex<double> b,
+        const std::complex<double> c)
+    {
+        std::complex<double> x0, x1, x2;
+        int num_roots = gsl_poly_complex_solve_cubic(a.real(), b.real(), c.real(), &x0, &x1, &x2);
+        if (num_roots == 1) {
+            return std::vector<double> { x0 };
+        }
+        return std::vector<double> { x0, x1, x2 };
+    }
 } // namespace gslcpp::polynomial
