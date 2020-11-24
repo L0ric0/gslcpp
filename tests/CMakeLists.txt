@@ -1,10 +1,9 @@
 set(BINARY ${CMAKE_PROJECT_NAME}_test)
 
-file(GLOB_RECURSE TEST_SOURCES LIST_DIRECTORIES false *.cpp)
-
-set(SOURCES ${TEST_SOURCES})
-
-add_executable(${BINARY} ${TEST_SOURCES})
+add_executable(${BINARY}
+	"src/math.cpp"
+	"src/poly.cpp"
+	"src/util.cpp")
 
 target_include_directories(${BINARY} PRIVATE include)
 
