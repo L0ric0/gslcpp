@@ -1,28 +1,14 @@
 #pragma once
 
+#include "gslcpp/poly/divided_difference.hpp"
+
 // stllib
 #include <complex>
 #include <vector>
 
 namespace gslcpp::polynomial
 {
-    class DividedDifference
-    {
-      public:
-        DividedDifference(const std::vector<double>& xa, const std::vector<double>& ya);
-        DividedDifference(
-            const std::vector<double>& xa,
-            const std::vector<double>& ya,
-            const std::vector<double>& dya);
-
-        double operator()(const double x) const;
-
-        std::vector<double> to_taylor(const double xp) const;
-
-      private:
-        std::vector<double> m_dd;
-        std::vector<double> m_xa;
-    };
+    
     /*! This function evaluates a polynomial with real coefficients for the real variable `x`.
      */
     double eval(const std::vector<double>& c, const double x);
