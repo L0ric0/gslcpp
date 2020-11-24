@@ -8,7 +8,7 @@
 
 namespace gslcpp::polynomial
 {
-    
+
     /*! This function evaluates a polynomial with real coefficients for the real variable `x`.
      */
     double eval(const std::vector<double>& c, const double x);
@@ -31,30 +31,39 @@ namespace gslcpp::polynomial
     /*! This function finds the real roots of the quadratic equation, $a x^2 + b x + c = 0$.
      *
      * The number of roots found depends on the sign of the discriminant b^2 - 4 a c. This will be
-     * subject to rounding and cancellation errors when computed in double precision, and will also be
-     * subject to errors if the coefficients of the polynomial are inexact. These errors may cause a
-     * discrete change in the number of roots. However, for polynomials with small integer coefficients
-     * the discriminant can always be computed exactly.
+     * subject to rounding and cancellation errors when computed in double precision, and will also
+     * be subject to errors if the coefficients of the polynomial are inexact. These errors may
+     * cause a discrete change in the number of roots. However, for polynomials with small integer
+     * coefficients the discriminant can always be computed exactly.
      */
     std::vector<double> solve_quadratic(const double a, const double b, const double c);
 
     /*! This function finds the complex roots of the quadratic equation, $a z^2 + b z + c = 0$.
      *
-     * Only the real components of the parameters are used. This is done as function overloads can't only differ by return type.
+     * Only the real components of the parameters are used. This is done as function overloads can't
+     * only differ by return type.
      */
-    std::vector<std::complex<double>>
-    solve_quadratic(const std::complex<double> a, const std::complex<double> b, const std::complex<double> c);
+    std::vector<std::complex<double>> solve_quadratic(
+        const std::complex<double> a,
+        const std::complex<double> b,
+        const std::complex<double> c);
 
-    /*! This function finds the real roots of the cubic equation, $x ^ 3 + a x ^ 2 + b x + c = 0$ with a leading coefficient of unity.
+    /*! This function finds the real roots of the cubic equation, $x ^ 3 + a x ^ 2 + b x + c = 0$
+     * with a leading coefficient of unity.
      */
     std::vector<double> solve_cubic(const double a, const double b, const double c);
 
-    /*! This function finds the real roots of the cubic equation, $x ^ 3 + a x ^ 2 + b x + c = 0$ with a leading coefficient of unity.
+    /*! This function finds the real roots of the cubic equation, $x ^ 3 + a x ^ 2 + b x + c = 0$
+     * with a leading coefficient of unity.
      *
-     * Only the real components of the parameters are used. This is done as function overloads can't only differ by return type.
+     * Only the real components of the parameters are used. This is done as function overloads can't
+     * only differ by return type.
      */
     std::vector<std::complex<double>> solve_cubic(
         const std::complex<double> a,
         const std::complex<double> b,
         const std::complex<double> c);
+
+    std::vector<std::complex<double>> solve(const std::vector<double>& a);
+
 } // namespace gslcpp::polynomial

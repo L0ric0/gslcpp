@@ -7,6 +7,8 @@
 
 // stllib
 #include <complex>
+#include <functional>
+#include <memory>
 #include <vector>
 
 namespace gslcpp::polynomial
@@ -26,8 +28,10 @@ namespace gslcpp::polynomial
     std::complex<double>
     eval(const std::vector<std::complex<double>>& c, const std::complex<double> z)
     {
-        return to_complex(
-            gsl_complex_poly_complex_eval(reinterpret_cast<const gsl_complex*>(c.data()), c.size(), to_complex(z)));
+        return to_complex(gsl_complex_poly_complex_eval(
+            reinterpret_cast<const gsl_complex*>(c.data()),
+            c.size(),
+            to_complex(z)));
     }
 
     std::vector<double>
@@ -38,7 +42,8 @@ namespace gslcpp::polynomial
         return res;
     }
 
-    std::vector<double> solve_quadratic(const double a, const double b, const double c) {
+    std::vector<double> solve_quadratic(const double a, const double b, const double c)
+    {
         double x0, x1;
         int num_roots = gsl_poly_solve_quadratic(a, b, c, &x0, &x1);
         if (num_roots == 0) {
@@ -50,9 +55,18 @@ namespace gslcpp::polynomial
         return std::vector<double> { x0, x1 };
     }
 
-    std::vector<std::complex<double>> solve_quadratic(const std::complex<double> a, const std::complex<double> b, const std::complex<double> c) {
+    std::vector<std::complex<double>> solve_quadratic(
+        const std::complex<double> a,
+        const std::complex<double> b,
+        const std::complex<double> c)
+    {
         std::complex<double> x0, x1;
-        int num_roots = gsl_poly_complex_solve_quadratic(a.real(), b.real(), c.real(), reinterpret_cast<gsl_complex*>(&x0), reinterpret_cast<gsl_complex*>(&x1));
+        int num_roots = gsl_poly_complex_solve_quadratic(
+            a.real(),
+            b.real(),
+            c.real(),
+            reinterpret_cast<gsl_complex*>(&x0),
+            reinterpret_cast<gsl_complex*>(&x1));
         if (num_roots == 0) {
             return std::vector<std::complex<double>> {};
         }
@@ -62,7 +76,8 @@ namespace gslcpp::polynomial
         return std::vector<std::complex<double>> { x0, x1 };
     }
 
-    std::vector<double> solve_cubic(const double a, const double b, const double c) {
+    std::vector<double> solve_cubic(const double a, const double b, const double c)
+    {
         double x0, x1, x2;
         int num_roots = gsl_poly_solve_cubic(a, b, c, &x0, &x1, &x2);
         if (num_roots == 1) {
@@ -71,16 +86,39 @@ namespace gslcpp::polynomial
         return std::vector<double> { x0, x1, x2 };
     }
 
-    std::vector<double> solve_cubic(
+    std::vector<std::complex<double>> solve_cubic(
         const std::complex<double> a,
         const std::complex<double> b,
         const std::complex<double> c)
     {
         std::complex<double> x0, x1, x2;
-        int num_roots = gsl_poly_complex_solve_cubic(a.real(), b.real(), c.real(), &x0, &x1, &x2);
+        int num_roots = gsl_poly_complex_solve_cubic(
+            a.real(),
+            b.real(),
+            c.real(),
+            reinterpret_cast<gsl_complex*>(&x0),
+            reinterpret_cast<gsl_complex*>(&x1),
+            reinterpret_cast<gsl_complex*>(&x2));
+
         if (num_roots == 1) {
-            return std::vector<double> { x0 };
+            return std::vector<std::complex<double>> { x0 };
         }
-        return std::vector<double> { x0, x1, x2 };
+        return std::vector<std::complex<double>> { x0, x1, x2 };
+    }
+
+    std::vector<std::complex<double>> solve(const std::vector<double>& a)
+    {
+        // wrap workspace into a unique_ptr for RAII
+        std::
+            unique_ptr<gsl_poly_complex_workspace, std::function<void(gsl_poly_complex_workspace*)>>
+                w(gsl_poly_complex_workspace_alloc(a.size()), &gsl_poly_complex_workspace_free);
+        std::vector<std::complex<double>> res(a.size() - 1);
+        gsl_poly_complex_solve(
+            a.data(),
+            a.size(),
+            w.get(),
+            reinterpret_cast<gsl_complex_packed_ptr>(res.data()));
+
+        return res;
     }
 } // namespace gslcpp::polynomial
