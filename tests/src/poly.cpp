@@ -1,16 +1,17 @@
 #include "gslcpp/poly.hpp"
 
-//gtest
+// gtest
 #include <gtest/gtest.h>
 
-//stllib
+// stllib
 #include <complex>
-#include <vector>
 #include <limits>
+#include <vector>
 
 const double eps = 100.0 * std::numeric_limits<double>::epsilon();
 
-TEST(Poly, Eval) {
+TEST(Poly, Eval)
+{
     std::vector<double> c { 1.0, 0.5, 0.3 };
     double x = 0.5;
     ASSERT_DOUBLE_EQ(1 + 0.5 * x + 0.3 * std::pow(x, 2), gslcpp::polynomial::eval(c, x));
@@ -20,7 +21,8 @@ TEST(Poly, Eval) {
     ASSERT_DOUBLE_EQ(1.0, gslcpp::polynomial::eval(c, x));
 }
 
-TEST(Poly, EvalComplex) {
+TEST(Poly, EvalComplex)
+{
     std::vector<double> c { 0.3 };
     std::complex<double> z { 0.75, 1.2 };
     ASSERT_NEAR(0.3, gslcpp::polynomial::eval(c, z).real(), eps);
@@ -32,7 +34,8 @@ TEST(Poly, EvalComplex) {
     ASSERT_NEAR(-0.6433305, gslcpp::polynomial::eval(c, z).imag(), eps);
 }
 
-TEST(Poly, ComplexEvalComplex) {
+TEST(Poly, ComplexEvalComplex)
+{
     std::vector<std::complex<double>> c { { 0.674, -1.423 } };
     std::complex<double> z { -1.44, 9.55 };
     ASSERT_NEAR(0.674, gslcpp::polynomial::eval(c, z).real(), eps);
@@ -44,7 +47,8 @@ TEST(Poly, ComplexEvalComplex) {
     ASSERT_NEAR(2.30389412, gslcpp::polynomial::eval(c, z).imag(), eps);
 }
 
-TEST(Poly, EvalDerivs) {
+TEST(Poly, EvalDerivs)
+{
     std::vector<double> c { 1.0, -2.0, 3.0, -4.0, 5.0, -6.0 };
     double x = -0.5;
 
@@ -87,7 +91,8 @@ TEST(Poly, DividedDifference)
     }
 }
 
-TEST(Poly, DividedDifferenceHermite) {
+TEST(Poly, DividedDifferenceHermite)
+{
     std::vector<double> xa { 1.3, 1.6, 1.9 };
     std::vector<double> ya { 0.6200860, 0.4554022, 0.2818186 };
     std::vector<double> dya { -0.5220232, -0.5698959, -0.5811571 };
@@ -103,4 +108,76 @@ TEST(Poly, DividedDifferenceHermite) {
         coeff = dd.to_taylor(xa[i]);
         ASSERT_DOUBLE_EQ(coeff[1], dya[i]);
     }
+}
+
+TEST(Poly, SolveQuadratic)
+{
+    std::vector<double> x;
+
+    x = gslcpp::polynomial::solve_quadratic(4.0, -20.0, 26.0);
+    ASSERT_EQ(0, x.size());
+
+    x = gslcpp::polynomial::solve_quadratic(4.0, -20.0, 25.0);
+    ASSERT_EQ(2, x.size());
+    ASSERT_DOUBLE_EQ(2.5, x[0]);
+    ASSERT_DOUBLE_EQ(2.5, x[1]);
+    ASSERT_EQ(x[0], x[1]);
+
+    x = gslcpp::polynomial::solve_quadratic(4.0, -20.0, 21.0);
+    ASSERT_EQ(2, x.size());
+    ASSERT_DOUBLE_EQ(1.5, x[0]);
+    ASSERT_DOUBLE_EQ(3.5, x[1]);
+
+    x = gslcpp::polynomial::solve_quadratic(4.0, 7.0, 0.0);
+    ASSERT_EQ(2, x.size());
+    ASSERT_DOUBLE_EQ(-1.75, x[0]);
+    ASSERT_DOUBLE_EQ(0.0, x[1]);
+
+    x = gslcpp::polynomial::solve_quadratic(5.0, 0.0, -20.0);
+    ASSERT_EQ(2, x.size());
+    ASSERT_DOUBLE_EQ(-2.0, x[0]);
+    ASSERT_DOUBLE_EQ(2.0, x[1]);
+
+    x = gslcpp::polynomial::solve_quadratic(0.0, 3.0, -21.0);
+    ASSERT_EQ(1, x.size());
+    ASSERT_DOUBLE_EQ(7.0, x[0]);
+}
+
+TEST(Poly, SolveCubic)
+{
+    std::vector<double> x;
+
+    x = gslcpp::polynomial::solve_cubic(0.0, 0.0, -27.0);
+    ASSERT_EQ(1, x.size());
+    ASSERT_DOUBLE_EQ(3.0, x[0]);
+
+    x = gslcpp::polynomial::solve_cubic(-51.0, 867.0, -4913.0);
+    ASSERT_EQ(3, x.size());
+    ASSERT_DOUBLE_EQ(17.0, x[0]);
+    ASSERT_DOUBLE_EQ(17.0, x[1]);
+    ASSERT_DOUBLE_EQ(17.0, x[2]);
+
+    x = gslcpp::polynomial::solve_cubic(-57, 1071.0, -6647.0);
+    ASSERT_EQ(3, x.size());
+    ASSERT_DOUBLE_EQ(17.0, x[0]);
+    ASSERT_DOUBLE_EQ(17.0, x[1]);
+    ASSERT_DOUBLE_EQ(23.0, x[2]);
+
+    x = gslcpp::polynomial::solve_cubic(-11.0, -493.0, 6647.0);
+    ASSERT_EQ(3, x.size());
+    ASSERT_DOUBLE_EQ(-23.0, x[0]);
+    ASSERT_DOUBLE_EQ(17.0, x[1]);
+    ASSERT_DOUBLE_EQ(17.0, x[2]);
+
+    x = gslcpp::polynomial::solve_cubic(-143.0, 5087.0, -50065.0);
+    ASSERT_EQ(3, x.size());
+    ASSERT_DOUBLE_EQ(17.0, x[0]);
+    ASSERT_DOUBLE_EQ(31.0, x[1]);
+    ASSERT_DOUBLE_EQ(95.0, x[2]);
+
+    x = gslcpp::polynomial::solve_cubic(-109.0, 803.0, 50065.0);
+    ASSERT_EQ(3, x.size());
+    ASSERT_DOUBLE_EQ(-17.0, x[0]);
+    ASSERT_DOUBLE_EQ(31.0, x[1]);
+    ASSERT_DOUBLE_EQ(95.0, x[2]);
 }
