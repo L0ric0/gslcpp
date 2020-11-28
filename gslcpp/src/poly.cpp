@@ -1,6 +1,7 @@
 // gslcpp
 #include "gslcpp/poly.hpp"
 
+#include "gslcpp/exception.hpp"
 #include "gslcpp/poly/solver.hpp"
 #include "gslcpp/util.hpp"
 
@@ -40,7 +41,8 @@ namespace gslcpp::polynomial
     eval_derivs(const std::vector<double>& c, const double x, const size_t num_derivs)
     {
         std::vector<double> res(num_derivs);
-        gsl_poly_eval_derivs(c.data(), c.size(), x, res.data(), num_derivs);
+        int gsl_errno = gsl_poly_eval_derivs(c.data(), c.size(), x, res.data(), num_derivs);
+        gslcpp::exception::gsl_errno_to_exception(gsl_errno);
         return res;
     }
 

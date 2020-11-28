@@ -1,6 +1,8 @@
 // gslcpp
 #include "gslcpp/poly/solver.hpp"
 
+#include "gslcpp/exception.hpp"
+
 // gsl
 #include <gsl/gsl_poly.h>
 
@@ -25,11 +27,12 @@ namespace gslcpp::polynomial
     std::vector<std::complex<double>> PolynomialSolver::solve(const std::vector<double>& a)
     {
         std::vector<std::complex<double>> result(size - 1);
-        gsl_poly_complex_solve(
+        int gsl_errno = gsl_poly_complex_solve(
             a.data(),
             size,
             m_workspace.get(),
             reinterpret_cast<gsl_complex_packed_ptr>(result.data()));
+        gslcpp::exception::gsl_errno_to_exception(gsl_errno);
         return result;
     }
 } // namespace gslcpp::polynomial

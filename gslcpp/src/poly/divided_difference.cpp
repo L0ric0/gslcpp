@@ -1,6 +1,9 @@
+// gslcpp
 #include "gslcpp/poly/divided_difference.hpp"
 
-//gsl
+#include "gslcpp/exception.hpp"
+
+// gsl
 #include <gsl/gsl_poly.h>
 
 // stllib
@@ -15,7 +18,8 @@ namespace gslcpp::polynomial
         : m_xa(xa),
           m_dd(xa.size())
     {
-        gsl_poly_dd_init(m_dd.data(), xa.data(), ya.data(), xa.size());
+        int gsl_errno = gsl_poly_dd_init(m_dd.data(), xa.data(), ya.data(), xa.size());
+        gslcpp::exception::gsl_errno_to_exception(gsl_errno);
     }
 
     DividedDifference::DividedDifference(
@@ -25,13 +29,14 @@ namespace gslcpp::polynomial
         : m_xa(2 * xa.size()),
           m_dd(2 * xa.size())
     {
-        gsl_poly_dd_hermite_init(
+        int gsl_errno = gsl_poly_dd_hermite_init(
             m_dd.data(),
             m_xa.data(),
             xa.data(),
             ya.data(),
             dya.data(),
             xa.size());
+        gslcpp::exception::gsl_errno_to_exception(gsl_errno);
     }
 
     double DividedDifference::operator()(const double x) const
@@ -42,7 +47,9 @@ namespace gslcpp::polynomial
     std::vector<double> DividedDifference::to_taylor(const double xp) const
     {
         std::vector<double> w(m_xa.size()), c(m_xa.size());
-        gsl_poly_dd_taylor(c.data(), xp, m_dd.data(), m_xa.data(), m_xa.size(), w.data());
+        int gsl_errno
+            = gsl_poly_dd_taylor(c.data(), xp, m_dd.data(), m_xa.data(), m_xa.size(), w.data());
+        gslcpp::exception::gsl_errno_to_exception(gsl_errno);
         return c;
     }
 } // namespace gslcpp::polynomial
