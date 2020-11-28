@@ -1,4 +1,5 @@
 add_library(gslcpp
+    "include/gslcpp/exception.hpp" "src/exception.cpp"
     "include/gslcpp/math.hpp" "src/math.cpp"
     "include/gslcpp/poly.hpp" "src/poly.cpp"
     "include/gslcpp/util.hpp" "src/util.cpp"
