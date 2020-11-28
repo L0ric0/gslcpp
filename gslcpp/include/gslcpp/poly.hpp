@@ -1,6 +1,8 @@
 #pragma once
 
+// gslcpp
 #include "gslcpp/poly/divided_difference.hpp"
+#include "gslcpp/poly/solver.hpp"
 
 // stllib
 #include <complex>
@@ -64,6 +66,12 @@ namespace gslcpp::polynomial
         const std::complex<double> b,
         const std::complex<double> c);
 
+    /*! This function computes the roots of the general polynomial $P(x) = a_0 + a_1 x + a_2 x^2 +
+     * \cdots + a_{n-1} x^{n-1}$
+     *
+     * using balanced-QR reduction of the companion matrix. The coefficient of the highest order
+     * term must be non-zero. The n-1 roots are returned.
+     */
     std::vector<std::complex<double>> solve(const std::vector<double>& a);
 
 } // namespace gslcpp::polynomial

@@ -1,5 +1,7 @@
+// gslcpp
 #include "gslcpp/poly.hpp"
 
+#include "gslcpp/poly/solver.hpp"
 #include "gslcpp/util.hpp"
 
 // gsl
@@ -108,17 +110,7 @@ namespace gslcpp::polynomial
 
     std::vector<std::complex<double>> solve(const std::vector<double>& a)
     {
-        // wrap workspace into a unique_ptr for RAII
-        std::
-            unique_ptr<gsl_poly_complex_workspace, std::function<void(gsl_poly_complex_workspace*)>>
-                w(gsl_poly_complex_workspace_alloc(a.size()), &gsl_poly_complex_workspace_free);
-        std::vector<std::complex<double>> res(a.size() - 1);
-        gsl_poly_complex_solve(
-            a.data(),
-            a.size(),
-            w.get(),
-            reinterpret_cast<gsl_complex_packed_ptr>(res.data()));
-
-        return res;
+        PolynomialSolver solver(a.size());
+        return solver.solve(a);
     }
 } // namespace gslcpp::polynomial
