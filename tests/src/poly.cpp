@@ -1,3 +1,7 @@
+// tests
+#include "poly.hpp"
+
+// gslcpp
 #include "gslcpp/poly.hpp"
 
 // gtest
@@ -10,41 +14,48 @@
 
 const double eps = 100.0 * std::numeric_limits<double>::epsilon();
 
-TEST(Poly, Eval)
-{
-    std::vector<double> c { 1.0, 0.5, 0.3 };
-    double x = 0.5;
-    ASSERT_DOUBLE_EQ(1 + 0.5 * x + 0.3 * std::pow(x, 2), gslcpp::polynomial::eval(c, x));
+const std::vector<EvalParam> eval_params { { { 1.0, 0.5, 0.3 }, 0.5, 1.325 },
+                                           { { 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1 }, 1.0, 1.0 } };
 
-    c = { 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1 };
-    x = 1.0;
-    ASSERT_DOUBLE_EQ(1.0, gslcpp::polynomial::eval(c, x));
+INSTANTIATE_TEST_SUITE_P(Eval, PolyEval, testing::ValuesIn(eval_params));
+
+TEST_P(PolyEval, ParamTest)
+{
+    EvalParam param = GetParam();
+    ASSERT_DOUBLE_EQ(param.result, gslcpp::polynomial::eval(param.c, param.x));
 }
 
-TEST(Poly, EvalComplex)
-{
-    std::vector<double> c { 0.3 };
-    std::complex<double> z { 0.75, 1.2 };
-    ASSERT_NEAR(0.3, gslcpp::polynomial::eval(c, z).real(), eps);
-    ASSERT_NEAR(0.0, gslcpp::polynomial::eval(c, z).imag(), eps);
+const std::vector<EvalComplexParam> eval_complex_params {
+    { { 0.3 }, { 0.75, 1.2 }, { 0.3, 0.0 } },
+    { { 2.1, -1.34, 0.76, 0.45 }, { 0.49, 0.95 }, { 0.3959143, -0.6433305 } }
+};
 
-    c = { 2.1, -1.34, 0.76, 0.45 };
-    z = { 0.49, 0.95 };
-    ASSERT_NEAR(0.3959143, gslcpp::polynomial::eval(c, z).real(), eps);
-    ASSERT_NEAR(-0.6433305, gslcpp::polynomial::eval(c, z).imag(), eps);
+INSTANTIATE_TEST_SUITE_P(EvalComplex, PolyEvalComplex, testing::ValuesIn(eval_complex_params));
+
+TEST_P(PolyEvalComplex, ParamTest)
+{
+    EvalComplexParam param = GetParam();
+    ASSERT_NEAR(param.result.real(), gslcpp::polynomial::eval(param.c, param.x).real(), eps);
+    ASSERT_NEAR(param.result.imag(), gslcpp::polynomial::eval(param.c, param.x).imag(), eps);
 }
 
-TEST(Poly, ComplexEvalComplex)
-{
-    std::vector<std::complex<double>> c { { 0.674, -1.423 } };
-    std::complex<double> z { -1.44, 9.55 };
-    ASSERT_NEAR(0.674, gslcpp::polynomial::eval(c, z).real(), eps);
-    ASSERT_NEAR(-1.423, gslcpp::polynomial::eval(c, z).imag(), eps);
+const std::vector<ComplexEvalComplexParam> complex_eval_complex_params {
+    { { { 0.674, -1.423 } }, { -1.44, 9.55 }, { 0.674, -1.423 } },
+    { { { -2.31, 0.44 }, { 4.21, -3.19 }, { 0.93, 1.04 }, { -0.42, 0.68 } },
+      { 0.49, 0.95 },
+      { 1.82462012, 2.30389412 } }
+};
 
-    c = { { -2.31, 0.44 }, { 4.21, -3.19 }, { 0.93, 1.04 }, { -0.42, 0.68 } };
-    z = { 0.49, 0.95 };
-    ASSERT_NEAR(1.82462012, gslcpp::polynomial::eval(c, z).real(), eps);
-    ASSERT_NEAR(2.30389412, gslcpp::polynomial::eval(c, z).imag(), eps);
+INSTANTIATE_TEST_SUITE_P(
+    ComplexEvalComplex,
+    PolyComplexEvalComplex,
+    testing::ValuesIn(complex_eval_complex_params));
+
+TEST_P(PolyComplexEvalComplex, ParamTest)
+{
+    ComplexEvalComplexParam param = GetParam();
+    ASSERT_NEAR(param.result.real(), gslcpp::polynomial::eval(param.c, param.x).real(), eps);
+    ASSERT_NEAR(param.result.imag(), gslcpp::polynomial::eval(param.c, param.x).imag(), eps);
 }
 
 TEST(Poly, EvalDerivs)
@@ -110,74 +121,193 @@ TEST(Poly, DividedDifferenceHermite)
     }
 }
 
-TEST(Poly, SolveQuadratic)
+const std::vector<SolveParam> solve_quadratic_params {
+    { 4.0, -20.0, 26.0, {} },           { 4.0, -20.0, 25.0, { 2.5, 2.5 } },
+    { 4.0, -20.0, 21.0, { 1.5, 3.5 } }, { 4.0, 7.0, 0.0, { -1.75, 0.0 } },
+    { 5.0, 0.0, -20.0, { -2.0, 2.0 } }, { 0.0, 3.0, -21.0, { 7.0 } }
+};
+
+INSTANTIATE_TEST_SUITE_P(
+    SolveQuadratic,
+    PolySolveQuadratic,
+    testing::ValuesIn(solve_quadratic_params));
+
+TEST_P(PolySolveQuadratic, ParamTest)
 {
-    std::vector<double> x;
-
-    x = gslcpp::polynomial::solve_quadratic(4.0, -20.0, 26.0);
-    ASSERT_EQ(0, x.size());
-
-    x = gslcpp::polynomial::solve_quadratic(4.0, -20.0, 25.0);
-    ASSERT_EQ(2, x.size());
-    ASSERT_DOUBLE_EQ(2.5, x[0]);
-    ASSERT_DOUBLE_EQ(2.5, x[1]);
-    ASSERT_EQ(x[0], x[1]);
-
-    x = gslcpp::polynomial::solve_quadratic(4.0, -20.0, 21.0);
-    ASSERT_EQ(2, x.size());
-    ASSERT_DOUBLE_EQ(1.5, x[0]);
-    ASSERT_DOUBLE_EQ(3.5, x[1]);
-
-    x = gslcpp::polynomial::solve_quadratic(4.0, 7.0, 0.0);
-    ASSERT_EQ(2, x.size());
-    ASSERT_DOUBLE_EQ(-1.75, x[0]);
-    ASSERT_DOUBLE_EQ(0.0, x[1]);
-
-    x = gslcpp::polynomial::solve_quadratic(5.0, 0.0, -20.0);
-    ASSERT_EQ(2, x.size());
-    ASSERT_DOUBLE_EQ(-2.0, x[0]);
-    ASSERT_DOUBLE_EQ(2.0, x[1]);
-
-    x = gslcpp::polynomial::solve_quadratic(0.0, 3.0, -21.0);
-    ASSERT_EQ(1, x.size());
-    ASSERT_DOUBLE_EQ(7.0, x[0]);
+    SolveParam param = GetParam();
+    std::vector<double> x = gslcpp::polynomial::solve_quadratic(param.a, param.b, param.c);
+    ASSERT_EQ(param.result.size(), x.size());
+    for (size_t i = 0; i < x.size(); i++) {
+        ASSERT_DOUBLE_EQ(param.result[i], x[i]);
+    }
 }
 
-TEST(Poly, SolveCubic)
+const std::vector<SolveParam> solve_cubic_params {
+    { 0.0, 0.0, -27.0, { 3.0 } },
+    { -51.0, 867.0, -4913.0, { 17.0, 17.0, 17.0 } },
+    { -57.0, 1071.0, -6647.0, { 17.0, 17.0, 23.0 } },
+    { -11.0, -493.0, 6647.0, { -23.0, 17.0, 17.0 } },
+    { -143.0, 5087.0, -50065.0, { 17.0, 31.0, 95.0 } },
+    { -109.0, 803.0, 50065.0, { -17.0, 31.0, 95.0 } }
+};
+
+INSTANTIATE_TEST_SUITE_P(SolveCubic, PolySolveCubic, testing::ValuesIn(solve_cubic_params));
+
+TEST_P(PolySolveCubic, ParamTest)
 {
-    std::vector<double> x;
 
-    x = gslcpp::polynomial::solve_cubic(0.0, 0.0, -27.0);
-    ASSERT_EQ(1, x.size());
-    ASSERT_DOUBLE_EQ(3.0, x[0]);
+    SolveParam param = GetParam();
 
-    x = gslcpp::polynomial::solve_cubic(-51.0, 867.0, -4913.0);
-    ASSERT_EQ(3, x.size());
-    ASSERT_DOUBLE_EQ(17.0, x[0]);
-    ASSERT_DOUBLE_EQ(17.0, x[1]);
-    ASSERT_DOUBLE_EQ(17.0, x[2]);
+    std::vector<double> x = gslcpp::polynomial::solve_cubic(param.a, param.b, param.c);
+    ASSERT_EQ(param.result.size(), x.size());
+    for (size_t i = 0; i < x.size(); i++) {
+        ASSERT_DOUBLE_EQ(param.result[i], x[i]);
+    }
+}
 
-    x = gslcpp::polynomial::solve_cubic(-57, 1071.0, -6647.0);
-    ASSERT_EQ(3, x.size());
-    ASSERT_DOUBLE_EQ(17.0, x[0]);
-    ASSERT_DOUBLE_EQ(17.0, x[1]);
-    ASSERT_DOUBLE_EQ(23.0, x[2]);
+const std::vector<SolveComplexParam> solve_quadratic_complex_param {
+    { { 4.0, 0.0 }, { -20.0, 0.0 }, { 26.0, 0.0 }, { { 2.5, -0.5 }, { 2.5, 0.5 } } },
+    { { 4.0, 0.0 }, { -20.0, 0.0 }, { 25.0, 0.0 }, { { 2.5, 0.0 }, { 2.5, 0.0 } } },
+    { { 4.0, 0.0 }, { -20.0, 0.0 }, { 21.0, 0.0 }, { { 1.5, 0.0 }, { 3.5, 0.0 } } },
+    { { 4.0, 0.0 }, { 7.0, 0.0 }, { 0.0, 0.0 }, { { -1.75, 0.0 }, { 0.0, 0.0 } } },
+    { { 5.0, 0.0 }, { 0.0, 0.0 }, { -20.0, 0.0 }, { { -2.0, 0.0 }, { 2.0, 0.0 } } },
+    { { 5.0, 0.0 }, { 0.0, 0.0 }, { 20.0, 0.0 }, { { 0.0, -2.0 }, { 0.0, 2.0 } } },
+    { { 0.0, 0.0 }, { 3.0, 0.0 }, { -21.0, 0.0 }, { { 7.0, 0.0 } } },
+    { { 0.0, 0.0 }, { 0.0, 0.0 }, { 1.0, 0.0 }, {} }
+};
 
-    x = gslcpp::polynomial::solve_cubic(-11.0, -493.0, 6647.0);
-    ASSERT_EQ(3, x.size());
-    ASSERT_DOUBLE_EQ(-23.0, x[0]);
-    ASSERT_DOUBLE_EQ(17.0, x[1]);
-    ASSERT_DOUBLE_EQ(17.0, x[2]);
+INSTANTIATE_TEST_SUITE_P(
+    SolveQuadraticComplex,
+    PolySolveQuadraticComplex,
+    testing::ValuesIn(solve_quadratic_complex_param));
 
-    x = gslcpp::polynomial::solve_cubic(-143.0, 5087.0, -50065.0);
-    ASSERT_EQ(3, x.size());
-    ASSERT_DOUBLE_EQ(17.0, x[0]);
-    ASSERT_DOUBLE_EQ(31.0, x[1]);
-    ASSERT_DOUBLE_EQ(95.0, x[2]);
+TEST_P(PolySolveQuadraticComplex, ParamTest)
+{
+    SolveComplexParam param = GetParam();
 
-    x = gslcpp::polynomial::solve_cubic(-109.0, 803.0, 50065.0);
-    ASSERT_EQ(3, x.size());
-    ASSERT_DOUBLE_EQ(-17.0, x[0]);
-    ASSERT_DOUBLE_EQ(31.0, x[1]);
-    ASSERT_DOUBLE_EQ(95.0, x[2]);
+    std::vector<std::complex<double>> x
+        = gslcpp::polynomial::solve_quadratic(param.a, param.b, param.c);
+    ASSERT_EQ(param.result.size(), x.size());
+    for (size_t i = 0; i < x.size(); i++) {
+        ASSERT_DOUBLE_EQ(param.result[i].real(), x[i].real());
+        ASSERT_DOUBLE_EQ(param.result[i].imag(), x[i].imag());
+    }
+}
+
+const std::vector<SolveComplexParam> solve_cubic_complex_param {
+    { { 0.0, 0.0 },
+      { 0.0, 0.0 },
+      { -27.0, 0.0 },
+      { { -1.5, -1.5 * std::sqrt(3.0) }, { -1.5, 1.5 * std::sqrt(3.0) }, { 3.0, 0.0 } } },
+    { { -1.0, 0.0 }, { 1.0, 0.0 }, { 39.0, 0.0 }, { { -3.0, 0.0 }, { 2.0, -3.0 }, { 2.0, 3.0 } } },
+    { { -51.0, 0.0 },
+      { 867.0, 0.0 },
+      { -4913.0, 0.0 },
+      { { 17.0, 0.0 }, { 17.0, 0.0 }, { 17.0, 0.0 } } },
+    { { -57.0, 0.0 },
+      { 1071.0, 0.0 },
+      { -6647.0, 0.0 },
+      { { 17.0, 0.0 }, { 17.0, 0.0 }, { 23.0, 0.0 } } },
+    { { -11.0, 0.0 },
+      { -493.0, 0.0 },
+      { 6647.0, 0.0 },
+      { { -23.0, 0.0 }, { 17.0, 0.0 }, { 17.0, 0.0 } } },
+    { { -143.0, 0.0 },
+      { 5087.0, 0.0 },
+      { -50065.0, 0.0 },
+      { { 17.0, 0.0 }, { 31.0, 0.0 }, { 95.0, 0.0 } } }
+};
+
+INSTANTIATE_TEST_SUITE_P(
+    SolveCubicComplex,
+    PolySolveCubicComplex,
+    testing::ValuesIn(solve_cubic_complex_param));
+
+TEST_P(PolySolveCubicComplex, ParamTest)
+{
+    SolveComplexParam param = GetParam();
+
+    std::vector<std::complex<double>> x
+        = gslcpp::polynomial::solve_cubic(param.a, param.b, param.c);
+    ASSERT_EQ(param.result.size(), x.size());
+    for (size_t i = 0; i < x.size(); i++) {
+        ASSERT_DOUBLE_EQ(param.result[i].real(), x[i].real());
+        ASSERT_DOUBLE_EQ(param.result[i].imag(), x[i].imag());
+    }
+}
+
+TEST(ComplexSolve, WilkinsonPolynomial)
+{
+    std::vector<double> a { -120, 274, -225, 85, -15, 1 };
+    std::vector<std::complex<double>> result { { 1.0, 0.0 },
+                                               { 2.0, 0.0 },
+                                               { 3.0, 0.0 },
+                                               { 4.0, 0.0 },
+                                               { 5.0, 0.0 } };
+
+    std::vector<std::complex<double>> x = gslcpp::polynomial::solve(a);
+
+    ASSERT_EQ(result.size(), x.size());
+    for (size_t i = 0; i < x.size(); i++) {
+        ASSERT_NEAR(result[i].real(), x[i].real(), 1e-9);
+        ASSERT_NEAR(result[i].imag(), x[i].imag(), 1e-9);
+    }
+}
+
+TEST(ComplexSolve, 8thOrderPolynomial)
+{
+    std::vector<double> a { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
+
+    double C = 0.5;
+    double S = std::sqrt(3.0) / 2.0;
+
+    std::vector<std::complex<double>> result { { -S, C }, { -S, -C }, { -C, S }, { -C, -S },
+                                               { C, S },  { C, -S },  { S, C },  { S, -C } };
+
+    std::vector<std::complex<double>> x = gslcpp::polynomial::solve(a);
+
+    ASSERT_EQ(result.size(), x.size());
+    for (size_t i = 0; i < x.size(); i++) {
+        ASSERT_NEAR(result[i].real(), x[i].real(), 1e-9);
+        ASSERT_NEAR(result[i].imag(), x[i].imag(), 1e-9);
+    }
+}
+
+TEST(ComplexSolve, 15thOrderPolynomial)
+{
+    std::vector<double> a { 32, -48, -8, 28, -8, 16, -16, 12, -16, 6, 10, -17, 10, 2, -4, 1 };
+    std::vector<std::complex<double>> result { { -1.6078107423472359, 0.00000000000000000 },
+                                               { -1.3066982484920768, 0.00000000000000000 },
+                                               { -1.0000000000000000, 0.00000000000000000 },
+                                               { -0.65893856175240950, -0.83459757287426684 },
+                                               { -0.65893856175240950, 0.83459757287426684 },
+                                               { -0.070891117403341281, -1.1359249087587791 },
+                                               { -0.070891117403341281, 1.1359249087587791 },
+                                               { 0.57284747839410854, -1.1987808988289705 },
+                                               { 0.57284747839410854, 1.1987808988289705 },
+                                               { 1.0000000000000000, 0.00000000000000000 },
+                                               { 1.0000000000000000, 0.00000000000000000 },
+                                               { 1.1142366961812986, -0.48083981203389980 },
+                                               { 1.1142366961812986, 0.48083981203389980 },
+                                               { 2.0000000000000000, 0.00000000000000000 },
+                                               { 2.0000000000000000, 0.00000000000000000 } };
+
+    std::vector<std::complex<double>> x = gslcpp::polynomial::solve(a);
+
+    std::sort(x.begin(), x.end(), [](std::complex<double> a, std::complex<double> b) {
+        std::complex<double> r = a - b;
+        if (r.real() == 0) {
+            return r.imag() < 0.0 ? true : false;
+        } else if (r.real() < 0.0) {
+            return true;
+        } else {
+            return false;
+        }
+    });
+
+    ASSERT_EQ(result.size(), x.size());
+    for (size_t i = 0; i < x.size(); i++) {
+        ASSERT_NEAR(result[i].real(), x[i].real(), 1e-7);
+        ASSERT_NEAR(result[i].imag(), x[i].imag(), 1e-7);
+    }
 }
